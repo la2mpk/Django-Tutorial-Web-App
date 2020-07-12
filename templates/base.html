@@ -10,9 +10,17 @@
 
     <title>Polls's Web App</title>
   </head>
-  <body>
-    {% block content %}
-    {% endblock %}
+  <body class="bg-light">
+    <main role="main" class="container">
+      <div class="d-flex align-items-center p-3 my-3 text-white-50 bg-primary shadow-sm rounded">
+        <div class="lh-100">
+          <h6 class="mb-0 text-white lh-100">WEB APP ENCUESTAS</h6>
+          <small>Desarrollada por Luis Muñoz</small>
+        </div>
+      </div>
+      {% block content %}
+      {% endblock %}
+    </main>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
