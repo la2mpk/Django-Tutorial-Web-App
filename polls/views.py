@@ -14,13 +14,13 @@ class IndexPageView(generic.ListView):
 
 
 def detail(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    context = {'question': question}
-    return render(request, 'polls/details.html', context)
+    return HttpResponse(f'You are seeing the details of quesion {question_id}')
 
 
 def results(request, question_id):
-    return HttpResponse(f'You are looking at the results of question {question_id}')
+    question = get_object_or_404(Question, pk=question_id)
+    context = {'question': question}
+    return render(request, 'polls/results.html', context)
 
 
 def vote(request, question_id):
