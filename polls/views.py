@@ -1,10 +1,12 @@
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
-from django.http import HttpResponse
-from .models import Question
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from .models import Question, Choice
 
 
 class IndexPageView(generic.ListView):
+    model = Question
     template_name = 'polls/index.html'
     context_object_name = 'latest_questions_list'
 
@@ -13,15 +15,27 @@ class IndexPageView(generic.ListView):
         return queryset
 
 
-def detail(request, question_id):
-    return HttpResponse(f'You are seeing the details of quesion {question_id}')
+class DetailPageView(generic.DetailView):
+    model = Question
+    template_name = 'polls/details.html'
+    context_object_name = 'question'
 
 
-def results(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    context = {'question': question}
-    return render(request, 'polls/results.html', context)
+class ResultsPageView(generic.DetailView):
+    model = Question
+    template_name = 'polls/results.html'
+    context_object_name = 'question'
 
 
 def vote(request, question_id):
-    return HttpResponse(f'You are voting on question {question_id}')
+    question = get_object_or_404(Question, pk=question_id)
+    try:
+        selected_choice = question.choice_set.get(pk=request.POST['choice'])
+    except (KeyError, Choice.DoesNotExist):
+        error_message = 'You didn\'t select a choice'
+        context = {'question': question, 'error_message': error_message}
+        return render(request, 'polls/details.html', context)
+    else:
+        selected_choice.votes += 1
+        selected_choice.save()
+        return HttpResponseRedirect(reverse('polls:results', args=(question.id, )))
