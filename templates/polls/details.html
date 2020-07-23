@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
+    {% if error_message %}
+        <div class="alert alert-warning" role="alert">
+            {{ error_message }}
+        </div>
+    {% endif %}
     <div class="my-3 p-3 bg-white rounded shadow-sm">
         <h6 class="pb-2 mb-0 font-weight-bolder text-secondary border-bottom border-gray mb-2">{{ question.question_text }}</h6>
         <form method="post" action="{% url 'polls:vote' question.id %}">
