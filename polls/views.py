@@ -13,6 +13,7 @@ class IndexPageView(generic.ListView):
 
     def get_queryset(self):
         queryset = Question.objects.filter(pub_date__lte=timezone.now())
+        queryset = queryset.exclude(choice=None)
         queryset = queryset.order_by('-pub_date')[:5]
         return queryset
 
@@ -24,6 +25,7 @@ class DetailPageView(generic.DetailView):
 
     def get_queryset(self):
         queryset = Question.objects.filter(pub_date__lte=timezone.now())
+        queryset = queryset.exclude(choice=None)
         return queryset
 
 
@@ -34,6 +36,7 @@ class ResultsPageView(generic.DetailView):
 
     def get_queryset(self):
         queryset = Question.objects.filter(pub_date__lte=timezone.now())
+        queryset = queryset.exclude(choice=None)
         return queryset
 
 

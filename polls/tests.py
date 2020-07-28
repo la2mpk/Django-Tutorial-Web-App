@@ -1,4 +1,5 @@
 import datetime
+import random
 
 from django.test import TestCase
 from django.utils import timezone
@@ -6,13 +7,16 @@ from django.urls import reverse
 from .models import Question
 
 
-def create_question(question_text, days):
+def create_question(question_text, days, choices=('choice 1',)):
     """
     Create a question with 'question_text' and published the given number of 'days' offset to now
     (negative for questions published in the past, positive for questions that have yet to be published).
     """
     time = timezone.now() + datetime.timedelta(days=days)
-    return Question.objects.create(question_text=question_text, pub_date=time)
+    question = Question.objects.create(question_text=question_text, pub_date=time)
+    for choice in choices:
+        question.choice_set.create(choice_text=choice)
+    return question
 
 
 class QuestionModelTests(TestCase):
@@ -53,6 +57,24 @@ class IndexViewTests(TestCase):
         self.assertContains(response, 'No hay encuestas disponibles')
         self.assertQuerysetEqual(response.context['latest_questions_list'], [])
 
+    def test_question_with_out_choices(self):
+        """
+        Question with out choices are not displayed on the index page.
+        """
+        create_question(question_text='Question with out choices', days=0, choices=[])
+        response = self.client.get(reverse('polls:index'))
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerysetEqual(response.context['latest_questions_list'], [])
+
+    def test_question_with_choices(self):
+        """
+        Question with choices are displayed on the index page.
+        """
+        create_question(question_text='Question with choices', days=0)
+        response = self.client.get(reverse('polls:index'))
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerysetEqual(response.context['latest_questions_list'], ['<Question: Question with choices>'])
+
     def test_past_question(self):
         """
         Question with a pub_date in the past are displayed on the index page.
@@ -79,11 +101,27 @@ class IndexViewTests(TestCase):
         create_question(question_text='Past question 2', days=-30)
         response = self.client.get(reverse('polls:index'))
         self.assertEqual(response.status_code, 200)
-        self.assertQuerysetEqual(response.context['latest_questions_list'], ['<Question: Past question 1>',
-                                                                             '<Question: Past question 2>'])
+        self.assertQuerysetEqual(response.context['latest_questions_list'], ['<Question: Past question 2>',
+                                                                             '<Question: Past question 1>'])
 
 
 class DetailViewTests(TestCase):
+
+    def test_question_with_out_choices(self):
+        """
+        Question with out choices are not displayed on the index page.
+        """
+        question = create_question(question_text='Question with out choices', days=0, choices=[])
+        response = self.client.get(reverse('polls:details', args=(question.id, )))
+        self.assertEqual(response.status_code, 404)
+
+    def test_question_with_choices(self):
+        """
+        Question with choices are displayed on the index page.
+        """
+        question = create_question(question_text='Question with choices', days=0)
+        response = self.client.get(reverse('polls:details', args=(question.id, )))
+        self.assertContains(response, question.question_text)
 
     def test_future_question(self):
         """
@@ -103,6 +141,22 @@ class DetailViewTests(TestCase):
 
 
 class ResultsViewTests(TestCase):
+
+    def test_question_with_out_choices(self):
+        """
+        Question with out choices are not displayed on the index page.
+        """
+        question = create_question(question_text='Question with out choices', days=0, choices=[])
+        response = self.client.get(reverse('polls:results', args=(question.id, )))
+        self.assertEqual(response.status_code, 404)
+
+    def test_question_with_choices(self):
+        """
+        Question with choices are displayed on the index page.
+        """
+        question = create_question(question_text='Question with choices', days=0)
+        response = self.client.get(reverse('polls:results', args=(question.id, )))
+        self.assertContains(response, question.question_text)
 
     def test_future_question(self):
         """
